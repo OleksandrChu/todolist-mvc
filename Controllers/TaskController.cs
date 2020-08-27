@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
 using mvc.Models;
+using mvc.Services;
 
 namespace mvc.Controllers
 {
@@ -8,31 +10,29 @@ namespace mvc.Controllers
     [ApiController]
     public class TaskController : Controller
     {
-        public static List<Task> tasks = new List<Task>();
+        public static DatabaseService  databseService;
+
+        static TaskController() {
+            databseService = new DatabaseService();
+        }
 
         [HttpGet]
         public IActionResult GetTasks()
         {
-            return Ok(tasks);
+            return Ok(databseService.Select());
         }
 
         [HttpPost]
         public IActionResult PostTask([FromBody] Task task)
         {
-            tasks.Add(task);
-            return Ok(task);
+            return Ok(databseService.Create(task));
         }
 
         [HttpPatch("{id}")]
         public IActionResult PatchTask(int id, [FromBody] JsonPatchDocument patch)
         {
-            var task = tasks.Find(task => task.Id.Equals(id));
-            if (task == null)
-            {
-                return BadRequest();
-            }
-            patch.ApplyTo(task);
-            return Ok(task);
+            databseService.Update(id, patch);
+            return Ok();
         }
 
     }
