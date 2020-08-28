@@ -7,7 +7,7 @@ namespace mvc.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class TaskController : Controller
+    public class TaskController : ControllerBase
     {
         public static TaskRepository databseService;
 
@@ -22,10 +22,10 @@ namespace mvc.Controllers
             return Ok(databseService.SelectAll());
         }
 
-        [HttpPost]
-        public IActionResult PostTask([FromBody] Task task)
+        [HttpPost("{listId}")]
+        public IActionResult PostTask([FromBody] Task task, int listId)
         {
-            return Ok(databseService.Create(task));
+            return Ok(databseService.Create(task, listId));
         }
 
         [HttpPatch("{id}")]

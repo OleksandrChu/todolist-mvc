@@ -16,11 +16,11 @@ namespace mvc.Repositories
             this.databaseService = databaseService;
         }
 
-        internal Task Create(Task task)
+        internal Task Create(Task task, int listId)
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                databaseService.BuildSqlCommand(connection, $"INSERT INTO tasks(name, done) VALUES('{task.Name}', '{task.Done}')").ExecuteNonQuery();
+                databaseService.BuildSqlCommand(connection, $"INSERT INTO tasks(name, done, list_id) VALUES('{task.Name}', '{task.Done}', '{listId}')").ExecuteNonQuery();
                 long lastId = (Int64)databaseService.BuildSqlCommand(connection, $"SELECT last_insert_rowid()").ExecuteScalar();
                 task.Id = Convert.ToInt32(lastId);
             }
@@ -37,7 +37,7 @@ namespace mvc.Repositories
                 {
                     if (reader.Read())
                     {
-                        updatedTask = new Task(reader.GetInt32(0), reader.GetString(1), reader.GetBoolean(2));
+                        updatedTask = new Task(reader.GetInt32(0), reader.GetString(1), reader.GetBoolean(2), reader.GetInt32(3));
                     }
                 }
             }
@@ -53,7 +53,7 @@ namespace mvc.Repositories
                 {
                     while (reader.Read())
                     {
-                        tasks.Add(new Task(reader.GetInt32(0), reader.GetString(1), reader.GetBoolean(2)));
+                        tasks.Add(new Task(reader.GetInt32(0), reader.GetString(1), reader.GetBoolean(2), reader.GetInt32(3)));
                     }
                 }
             }

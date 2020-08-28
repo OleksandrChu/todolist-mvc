@@ -7,6 +7,13 @@ namespace mvc.Services
 {
     public class DatabaseService
     {
+        private const string SQL_CREATE_TABLE_TASKS = "CREATE TABLE IF NOT EXISTS tasks("
+            + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + "name VARCHAR(50) NOT NULL, "
+            + "done BOOLEAN NOT NULL, "
+            + "list_id INTEGEGER NOT NULL, "
+            + "FOREIGN KEY (list_id) REFERENCES lists (id));";
+        private const string SQL_CREATE_TABLE_LISTS = "CREATE TABLE IF NOT EXISTS lists(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(50));";
         public DatabaseService()
         {
             SetUpDataBase();
@@ -33,7 +40,7 @@ namespace mvc.Services
         {
             using (var connection = ProvideConnection())
             {
-                BuildSqlCommand(connection, "CREATE TABLE IF NOT EXISTS tasks(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(50), done BOOLEAN)").ExecuteNonQuery();
+                BuildSqlCommand(connection, SQL_CREATE_TABLE_LISTS + SQL_CREATE_TABLE_TASKS).ExecuteNonQuery();
             }
         }
     }
