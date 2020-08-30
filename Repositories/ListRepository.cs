@@ -30,7 +30,23 @@ namespace mvc.Repositories
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                return connection.Query<TaskList>("SELECT * FROM lists").AsList();
+               
+                Dictionary<int, TaskList> lists = new Dictionary<int, TaskList>();
+                return connection.Query<TaskList, Task, TaskList>($"SELECT * FROM lists INNER JOIN tasks ON tasks.listId = lists.id", 
+                (taskList, task) => 
+                {
+                    TaskList currentTaskList;
+                    if(lists.ContainsKey(taskList.Id))
+                    {
+                        currentTaskList = lists[taskList.Id];
+                    } else {
+                        currentTaskList = taskList;
+                        currentTaskList.Tasks = new List<Task>();
+                        lists.Add(currentTaskList.Id, currentTaskList);
+                    }
+                    currentTaskList.Tasks.Add(task);
+                    return currentTaskList;
+                }).Distinct().AsList();
             }
         }
 
@@ -55,7 +71,18 @@ namespace mvc.Repositories
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                return connection.Query<TaskList>($"SELECT * FROM lists WHERE id = {id}").First();
+                TaskList currentTaskList = null;
+                return connection.Query<TaskList, Task, TaskList>($"SELECT * FROM lists INNER JOIN tasks ON tasks.listId = {id} WHERE lists.id = {id}", 
+                (taskList, task) => 
+                {
+                    if(task == null) return null;
+                    if(currentTaskList == null) {
+                        currentTaskList = taskList;
+                        currentTaskList.Tasks = new List<Task>();
+                    }
+                    currentTaskList.Tasks.Add(task);
+                    return currentTaskList;
+                }, splitOn: "Id").FirstOrDefault();
             }
         }
     }

@@ -17,7 +17,5 @@ namespace mvc.Models
         public string Name { get; set; }
         public bool Done { get; set; }
         public int ListId {get; set;}
-
-
     }
 }
