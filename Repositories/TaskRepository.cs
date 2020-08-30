@@ -1,13 +1,12 @@
-using System;
 using System.Collections.Generic;
-using Microsoft.Data.Sqlite;
-using mvc.Controllers;
+using System.Linq;
+using Dapper;
 using mvc.Models;
 using mvc.Services;
 
 namespace mvc.Repositories
 {
-    public class TaskRepository
+    public class TaskRepository : IDbRepository<Task>
     {
         private readonly DatabaseService databaseService;
 
@@ -16,48 +15,46 @@ namespace mvc.Repositories
             this.databaseService = databaseService;
         }
 
-        internal Task Create(Task task, int listId)
+        public Task Create(Task model)
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                databaseService.BuildSqlCommand(connection, $"INSERT INTO tasks(name, done, list_id) VALUES('{task.Name}', '{task.Done}', '{listId}')").ExecuteNonQuery();
-                long lastId = (Int64)databaseService.BuildSqlCommand(connection, $"SELECT last_insert_rowid()").ExecuteScalar();
-                task.Id = Convert.ToInt32(lastId);
+                connection.Execute($"INSERT INTO tasks(name, done, listId) VALUES(@Name, @Done, @ListId)", model);
+                return connection.Query<Task>("SELECT * FROM tasks WHERE id = (SELECT MAX(id) FROM tasks)").First();
             }
-            return task;
         }
 
-        internal Task Update(int id, JsonPatchDocument patch)
-        {   
-            Task updatedTask = null;
-            using (var connection = databaseService.ProvideConnection())
-            {
-                databaseService.BuildSqlCommand(connection, $"UPDATE tasks SET done = {patch.Done} WHERE id = {id};").ExecuteNonQuery();
-                using(var reader = databaseService.BuildSqlCommand(connection, $"SELECT * FROM tasks WHERE id = {id}").ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        updatedTask = new Task(reader.GetInt32(0), reader.GetString(1), reader.GetBoolean(2), reader.GetInt32(3));
-                    }
-                }
-            }
-            return updatedTask;
-        }
-
-        internal List<Task> SelectAll()
+        public void Delete(int id)
         {
-            var tasks = new List<Task>();
             using (var connection = databaseService.ProvideConnection())
             {
-                using (var reader = databaseService.BuildSqlCommand(connection, "SELECT * FROM tasks").ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        tasks.Add(new Task(reader.GetInt32(0), reader.GetString(1), reader.GetBoolean(2), reader.GetInt32(3)));
-                    }
-                }
+                connection.Execute($"DELETE FROM tasks WHERE id = {id}");
             }
-            return tasks;
+        }
+
+        public Task Select(int id)
+        {
+            using (var connection = databaseService.ProvideConnection())
+            {
+                return connection.Query<Task>($"SELECT * FROM tasks WHERE id = {id}").First();
+            }
+        }
+
+        public List<Task> SelectAll()
+        {
+            using (var connection = databaseService.ProvideConnection())
+            {
+                return connection.Query<Task>("SELECT * FROM tasks").AsList();
+            }
+        }
+
+        public Task Update(Task model)
+        {
+            using (var connection = databaseService.ProvideConnection())
+            {
+                connection.Execute($"UPDATE tasks SET name = @Name, done = @Done, listId = @ListId WHERE id = @Id;", model);
+                return connection.Query<Task>("SELECT * FROM tasks WHERE id = @Id", model).First();
+            }
         }
     }
 }

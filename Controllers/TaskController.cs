@@ -9,34 +9,38 @@ namespace mvc.Controllers
     [ApiController]
     public class TaskController : ControllerBase
     {
-        public static TaskRepository databseService;
+        public static TaskRepository taskRepository;
 
         static TaskController()
         {
-            databseService = new TaskRepository(new DatabaseService());
+            taskRepository = new TaskRepository(new DatabaseService());
         }
 
         [HttpGet]
         public IActionResult GetTasks()
         {
-            return Ok(databseService.SelectAll());
+            return Ok(taskRepository.SelectAll());
         }
 
         [HttpPost("{listId}")]
-        public IActionResult PostTask([FromBody] Task task, int listId)
+        public IActionResult PostTask(int listId, [FromBody] Task task)
         {
-            return Ok(databseService.Create(task, listId));
+            task.ListId = listId;
+            return Created("", taskRepository.Create(task));
         }
 
-        [HttpPatch("{id}")]
-        public IActionResult PatchTask(int id, [FromBody] JsonPatchDocument patch)
+        [HttpPut("{id}")]
+        public IActionResult PatchTask(int id, [FromBody] Task task)
         {
-            var updatedTask = databseService.Update(id, patch);
-            if(updatedTask == null)
-            {
-                return BadRequest();
-            }
-            return Ok(updatedTask);
+            task.Id = id;
+            return Ok(taskRepository.Update(task));
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteTask(int id)
+        {
+            taskRepository.Delete(id);
+            return Ok();
         }
 
     }

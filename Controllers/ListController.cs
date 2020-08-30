@@ -9,17 +9,36 @@ namespace mvc.Controllers
     [ApiController]
     public class ListController : ControllerBase
     {
-        public static ListRepository databseService;
+        public static ListRepository listRepository;
 
         static ListController()
         {
-            databseService = new ListRepository(new DatabaseService());
+            listRepository = new ListRepository(new DatabaseService());
+        }
+
+        [HttpGet]
+        public IActionResult GetLists()
+        {
+            return Ok(listRepository.SelectAll());
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetList(int id)
+        {
+            return Ok(listRepository.Select(id));
         }
 
         [HttpPost]
         public IActionResult PostList([FromBody] TaskList task)
         {
-            return Ok(databseService.CreateList(task));
+            return Ok(listRepository.Create(task));
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteList(int id)
+        {
+            listRepository.Delete(id);
+            return Ok();
         }
     }
 }

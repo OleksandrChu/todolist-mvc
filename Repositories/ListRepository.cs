@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Dapper;
 using mvc.Models;
+using mvc.Services;
 
-namespace mvc.Services
+namespace mvc.Repositories
 {
-    public class ListRepository
+    public class ListRepository : IDbRepository<TaskList>
     {
         private readonly DatabaseService databaseService;
 
@@ -11,15 +15,48 @@ namespace mvc.Services
         {
             this.databaseService = databaseService;
         }
-        internal TaskList CreateList(TaskList list)
+
+        public TaskList Create(TaskList model)
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                databaseService.BuildSqlCommand(connection, $"INSERT INTO lists(name) VALUES('{list.Name}')").ExecuteNonQuery();
-                long lastId = (Int64)databaseService.BuildSqlCommand(connection, $"SELECT last_insert_rowid()").ExecuteScalar();
-                list.Id = Convert.ToInt32(lastId);
+                connection.Execute($"INSERT INTO lists(name) VALUES('{model.Name}')", model);
+                model.Id = Convert.ToInt32(connection.Query<long>("SELECT MAX(id) FROM lists").First());
             }
-            return list;
+            return model;
+        }
+
+        public List<TaskList> SelectAll()
+        {
+            using (var connection = databaseService.ProvideConnection())
+            {
+                return connection.Query<TaskList>("SELECT * FROM lists").AsList();
+            }
+        }
+
+        public TaskList Update(TaskList model)
+        {
+            using (var connection = databaseService.ProvideConnection())
+            {
+                connection.Execute($"UPDATE tasks SET name = @Name WHERE id = @Id;", model);
+                return connection.Query<TaskList>("SELECT * FROM tasks WHERE id = @Id", model).First();
+            }
+        }
+
+        public void Delete(int id)
+        {
+            using (var connection = databaseService.ProvideConnection())
+            {
+                connection.Execute($"DELETE FROM lists WHERE id = {id}");
+            }
+        }
+
+        public TaskList Select(int id)
+        {
+            using (var connection = databaseService.ProvideConnection())
+            {
+                return connection.Query<TaskList>($"SELECT * FROM lists WHERE id = {id}").First();
+            }
         }
     }
 }

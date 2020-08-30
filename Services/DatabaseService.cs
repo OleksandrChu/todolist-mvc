@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data;
 using Microsoft.Data.Sqlite;
 using mvc.Controllers;
 using mvc.Models;
@@ -11,8 +12,8 @@ namespace mvc.Services
             + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
             + "name VARCHAR(50) NOT NULL, "
             + "done BOOLEAN NOT NULL, "
-            + "list_id INTEGEGER NOT NULL, "
-            + "FOREIGN KEY (list_id) REFERENCES lists (id));";
+            + "listId INTEGEGER NOT NULL, "
+            + "FOREIGN KEY (listId) REFERENCES lists (id) ON DELETE CASCADE);";
         private const string SQL_CREATE_TABLE_LISTS = "CREATE TABLE IF NOT EXISTS lists(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(50));";
         public DatabaseService()
         {
@@ -21,10 +22,7 @@ namespace mvc.Services
 
         internal SqliteConnection ProvideConnection()
         {
-            var connectionBuilder = new SqliteConnectionStringBuilder
-            {
-                DataSource = "./todos.db"
-            };
+            var connectionBuilder = new SqliteConnectionStringBuilder("Data Source=./todos.db; foreign keys=true;");
             return new SqliteConnection(connectionBuilder.ConnectionString);
         }
 

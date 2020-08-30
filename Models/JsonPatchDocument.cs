@@ -5,11 +5,8 @@ namespace mvc.Controllers
 {
     public class JsonPatchDocument
     {
+        public int Id { get; set; }
         public bool Done { get; set; }
-
-        internal void ApplyTo(Task task)
-        {
-            task.Done = Done;
-        }
+        public string Name {get; set;}
     }
 }
