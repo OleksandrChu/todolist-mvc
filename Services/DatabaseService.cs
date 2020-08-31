@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Data;
+using Dapper;
 using Microsoft.Data.Sqlite;
 using mvc.Controllers;
 using mvc.Models;
@@ -38,7 +39,7 @@ namespace mvc.Services
         {
             using (var connection = ProvideConnection())
             {
-                BuildSqlCommand(connection, SQL_CREATE_TABLE_LISTS + SQL_CREATE_TABLE_TASKS).ExecuteNonQuery();
+                connection.Execute(SQL_CREATE_TABLE_LISTS + SQL_CREATE_TABLE_TASKS);
             }
         }
     }

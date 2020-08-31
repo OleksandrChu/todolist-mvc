@@ -32,7 +32,7 @@ namespace mvc.Repositories
             {
                
                 Dictionary<int, TaskList> lists = new Dictionary<int, TaskList>();
-                return connection.Query<TaskList, Task, TaskList>($"SELECT * FROM lists INNER JOIN tasks ON tasks.listId = lists.id", 
+                return connection.Query<TaskList, Task, TaskList>($"SELECT * FROM lists LEFT JOIN tasks ON tasks.listId = lists.id", 
                 (taskList, task) => 
                 {
                     TaskList currentTaskList;
@@ -82,7 +82,7 @@ namespace mvc.Repositories
                     }
                     currentTaskList.Tasks.Add(task);
                     return currentTaskList;
-                }, splitOn: "Id").FirstOrDefault();
+                }).FirstOrDefault();
             }
         }
     }
