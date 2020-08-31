@@ -20,7 +20,7 @@ namespace mvc.Repositories
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                connection.Execute($"INSERT INTO lists(name) VALUES('{model.Name}')", model);
+                connection.Execute($"INSERT INTO lists(name) VALUES(@Name)", model);
                 model.Id = Convert.ToInt32(connection.Query<long>("SELECT MAX(id) FROM lists").First());
             }
             return model;
@@ -63,26 +63,25 @@ namespace mvc.Repositories
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                connection.Execute($"DELETE FROM lists WHERE id = {id}");
+                connection.Execute($"DELETE FROM lists WHERE lists.id = @ListId", new {ListId = id});
             }
         }
 
-        public TaskList Select(int id)
+       public TaskList Select(int id)
         {
             using (var connection = databaseService.ProvideConnection())
             {
                 TaskList currentTaskList = null;
-                return connection.Query<TaskList, Task, TaskList>($"SELECT * FROM lists INNER JOIN tasks ON tasks.listId = {id} WHERE lists.id = {id}", 
+                return connection.Query<TaskList, Task, TaskList>($"SELECT * FROM lists LEFT JOIN tasks ON tasks.listId = @ListId WHERE lists.id = @ListId", 
                 (taskList, task) => 
                 {
-                    if(task == null) return null;
                     if(currentTaskList == null) {
                         currentTaskList = taskList;
                         currentTaskList.Tasks = new List<Task>();
                     }
                     currentTaskList.Tasks.Add(task);
                     return currentTaskList;
-                }).FirstOrDefault();
+                }, new {ListId = id}).FirstOrDefault();
             }
         }
     }

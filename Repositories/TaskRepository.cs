@@ -28,7 +28,7 @@ namespace mvc.Repositories
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                connection.Execute($"DELETE FROM tasks WHERE id = {id}");
+                connection.Execute($"DELETE FROM tasks WHERE id = @TaskId", new {TaskId = id});
             }
         }
 
@@ -36,7 +36,7 @@ namespace mvc.Repositories
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                return connection.Query<Task>($"SELECT * FROM tasks WHERE id = {id}").First();
+                return connection.Query<Task>($"SELECT * FROM tasks WHERE id = @TaskId", new {TaskId = id}).First();
             }
         }
 

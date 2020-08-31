@@ -25,6 +25,7 @@ namespace mvc.Controllers
         [HttpGet("{id}")]
         public IActionResult GetList(int id)
         {
+            System.Console.WriteLine(id);
             return Ok(listRepository.Select(id));
         }
 
