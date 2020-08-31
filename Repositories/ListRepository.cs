@@ -30,7 +30,6 @@ namespace mvc.Repositories
         {
             using (var connection = databaseService.ProvideConnection())
             {
-               
                 Dictionary<int, TaskList> lists = new Dictionary<int, TaskList>();
                 return connection.Query<TaskList, Task, TaskList>($"SELECT * FROM lists LEFT JOIN tasks ON tasks.listId = lists.id", 
                 (taskList, task) => 
@@ -54,8 +53,8 @@ namespace mvc.Repositories
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                connection.Execute($"UPDATE tasks SET name = @Name WHERE id = @Id;", model);
-                return connection.Query<TaskList>("SELECT * FROM tasks WHERE id = @Id", model).First();
+                connection.Execute($"UPDATE lists SET name = @Name WHERE id = @Id;", model);
+                return connection.Query<TaskList>("SELECT * FROM lists WHERE id = @Id", model).First();
             }
         }
 

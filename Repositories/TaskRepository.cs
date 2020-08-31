@@ -3,6 +3,7 @@ using System.Linq;
 using Dapper;
 using mvc.Models;
 using mvc.Services;
+using mvc.Extensions;
 
 namespace mvc.Repositories
 {
@@ -52,7 +53,8 @@ namespace mvc.Repositories
         {
             using (var connection = databaseService.ProvideConnection())
             {
-                connection.Execute($"UPDATE tasks SET name = @Name, done = @Done, listId = @ListId WHERE id = @Id;", model);
+                // name = @Name, done = @Done, listid = @ListId
+                connection.Execute(model.BuildReplaceQuery(condition: "Id"), model);
                 return connection.Query<Task>("SELECT * FROM tasks WHERE id = @Id", model).First();
             }
         }

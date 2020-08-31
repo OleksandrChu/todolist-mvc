@@ -25,8 +25,14 @@ namespace mvc.Controllers
         [HttpGet("{id}")]
         public IActionResult GetList(int id)
         {
-            System.Console.WriteLine(id);
             return Ok(listRepository.Select(id));
+        }
+
+        [HttpPatch("{id}")]
+        public IActionResult UpdateList(int id, [FromBody] TaskList taskList)
+        {
+            taskList.Id = id;
+            return Ok(listRepository.Update(taskList));
         }
 
         [HttpPost]

@@ -13,7 +13,7 @@ namespace mvc.Services
             + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
             + "name VARCHAR(50) NOT NULL, "
             + "done BOOLEAN NOT NULL, "
-            + "listId INTEGEGER NOT NULL, "
+            + "listId INTEGER NOT NULL, "
             + "FOREIGN KEY (listId) REFERENCES lists (id) ON DELETE CASCADE);";
         private const string SQL_CREATE_TABLE_LISTS = "CREATE TABLE IF NOT EXISTS lists(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(50));";
         public DatabaseService()
